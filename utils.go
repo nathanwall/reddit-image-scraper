@@ -22,6 +22,7 @@ func generateImageName(description string, extension string) string {
 	return imageName
 }
 
+// Validate file type
 func validateFileType(imageLink string) bool {
 	for _, imageType := range Constants["imageTypes"].([]string) {
 		if strings.HasSuffix(imageLink, imageType) {
@@ -29,6 +30,20 @@ func validateFileType(imageLink string) bool {
 		}
 	}
 	return false
+}
+
+// Create image_downloads directory if it does not exist
+func createImageDownloadDirectory() Result {
+	result := Result{success: true, errorMessage: ""}
+	_, err := os.Stat(Constants["imageDownloadPath"].(string))
+	if os.IsNotExist(err) {
+		err := os.Mkdir(Constants["imageDownloadPath"].(string), 0755)
+		if err != nil {
+			result.success = false
+			result.errorMessage = "Error creating image download directory: " + err.Error()
+		}
+	}
+	return result
 }
 
 // Download images
@@ -56,6 +71,9 @@ func downloadImages(imageData []ImageData ) Result {
 		if response.ContentLength == 0 {
 			continue
 		}
+
+		// Create image_downloads directory if it does not exist
+		createImageDownloadDirectory()
 
 		// Create file
 		file, err := os.Create(Constants["imageDownloadPath"].(string) + imageName)

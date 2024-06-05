@@ -4,10 +4,10 @@ Scrape images from Reddit. This script will download images from a subreddit and
 This project uses old.reddit.com to scrape images.
 
 ## Installation
-Clone the repository
+Clone the repository.
 
 ## Usage
-`go run .` or `./reddit-image-scraper`
+`go run .` or `./reddit-image-scraper` after building the binary file.
 
 ## Configuration
 Configuration is done through the `constants.go` file.
@@ -17,3 +17,6 @@ Configuration is done through the `constants.go` file.
 - `HTMLElement` - The HTML element that contains the image URL. By default, it is set to `div.thing`.
 - `imageAttribute` - The attribute that contains the image URL. By default, it is set to `data-url`.
 - `imageDescription` - The attribute that contains the image description, which is used for the image name. By default, it is set to `data-permalink`.
+
+## Build
+`go build` to build an executable binary file.
