@@ -7,7 +7,7 @@ This project uses old.reddit.com to scrape images.
 Clone the repository
 
 ## Usage
-`go run .`
+`go run .` or `./reddit-image-scraper`
 
 ## Configuration
 Configuration is done through the `constants.go` file.
