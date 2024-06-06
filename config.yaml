@@ -6,4 +6,4 @@ config:
   HTMLElement: div.thing
   imageAttribute: data-url
   imageDescription: data-permalink
-  imageCount: 2
+  imageCount: -1
