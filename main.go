@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"reddit-image-scraper/modules"
+	"reddit-image-scraper/resources"
 
 	"github.com/gocolly/colly"
 )
@@ -10,6 +12,8 @@ import (
 func main() {
 	// Create a new collector
 	collector := colly.NewCollector()
+	var success resources.Result
+	var imageData []resources.ImageData
 
 	// On every request, visit the URL
 	collector.OnRequest(func(r *colly.Request) {
@@ -27,19 +31,11 @@ func main() {
 	})
 
 	// When HTML is received, get the image and description and download the image
-	collector.OnHTML(Constants["HTMLElement"].(string), func(e *colly.HTMLElement) {
-		var imageData []ImageData = []ImageData{
-			{
-				image: e.Attr(Constants["imageAttribute"].(string)), 
-				description: e.Attr(Constants["imageDescription"].(string)),
-			},
-		}
-
-		// Download images. If there is an error, log the error
-		success := downloadImages(imageData)
-		if !success.success {
-			fmt.Println("Error downloading image:", success.errorMessage)
-		}
+	collector.OnHTML(resources.Constants["HTMLElement"].(string), func(e *colly.HTMLElement) {
+		imageData = append(imageData, resources.ImageData{
+				Image: e.Attr(resources.Constants["imageAttribute"].(string)),
+				Description: e.Attr(resources.Constants["imageDescription"].(string)),
+			})
 	})
 
 	// When scraping is finished, log the message
@@ -48,5 +44,12 @@ func main() {
 	})
 
 	// Visit the reddit URL
-	collector.Visit(Constants["redditURL"].(string))
+	collector.Visit(resources.Constants["redditURL"].(string))
+
+	success = modules.DownloadImages(imageData)
+	if !success.Success {
+		fmt.Println("Error downloading images:", success.ErrorMessage)
+	}	else {
+		fmt.Println("Downloaded", success.Count, "images")
+	}
 }

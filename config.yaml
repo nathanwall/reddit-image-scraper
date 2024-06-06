@@ -1,0 +1,9 @@
+config:
+  redditURL: https://old.reddit.com/r/coolguides/top/?t=day
+  imageDownloadPath: /image_downloads/
+  usePWD: true
+  imageTypes: ['jpg', 'png', 'jpeg']
+  HTMLElement: div.thing
+  imageAttribute: data-url
+  imageDescription: data-permalink
+  imageCount: 2

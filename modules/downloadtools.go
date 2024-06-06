@@ -1,9 +1,10 @@
-package main
+package modules
 
 import (
 	"io"
 	"net/http"
 	"os"
+	"reddit-image-scraper/resources"
 	"strings"
 )
 
@@ -24,7 +25,7 @@ func generateImageName(description string, extension string) string {
 
 // Validate file type
 func validateFileType(imageLink string) bool {
-	for _, imageType := range Constants["imageTypes"].([]string) {
+	for _, imageType := range resources.Constants["imageTypes"].([]string) {
 		if strings.HasSuffix(imageLink, imageType) {
 			return true
 		}
@@ -33,25 +34,25 @@ func validateFileType(imageLink string) bool {
 }
 
 // Create image_downloads directory if it does not exist
-func createImageDownloadDirectory() Result {
-	result := Result{success: true, errorMessage: ""}
-	_, err := os.Stat(Constants["imageDownloadPath"].(string))
+func createImageDownloadDirectory() resources.Result {
+	result := resources.Result{Success: true, ErrorMessage: ""}
+	_, err := os.Stat(resources.Constants["imageDownloadPath"].(string))
 	if os.IsNotExist(err) {
-		err := os.Mkdir(Constants["imageDownloadPath"].(string), 0755)
+		err := os.Mkdir(resources.Constants["imageDownloadPath"].(string), 0755)
 		if err != nil {
-			result.success = false
-			result.errorMessage = "Error creating image download directory: " + err.Error()
+			result.Success = false
+			result.ErrorMessage = "Error creating image download directory: " + err.Error()
 		}
 	}
 	return result
 }
 
 // Download images
-func downloadImages(imageData []ImageData ) Result {
-	result := Result{success: true, errorMessage: ""}
+func DownloadImages(imageData []resources.ImageData ) resources.Result {
+	result := resources.Result{Success: true, ErrorMessage: ""}
 	for _, data := range imageData {
-		imageLink := data.image
-		imageName := generateImageName(data.description, getImageExtension(imageLink))
+		imageLink := data.Image
+		imageName := generateImageName(data.Description, getImageExtension(imageLink))
 
 		// Skip if image is not of the correct type
 		validFile := validateFileType(imageLink)
@@ -62,8 +63,8 @@ func downloadImages(imageData []ImageData ) Result {
 		// Download image
 		response, err := http.Get(imageLink)
 		if err != nil {
-			result.success = false
-			result.errorMessage = "Error downloading image: " + err.Error() + " for image: " + imageName + " at link: " + imageLink
+			result.Success = false
+			result.ErrorMessage = "Error downloading image: " + err.Error() + " for image: " + imageName + " at link: " + imageLink
 		}
 		defer response.Body.Close()
 
@@ -76,18 +77,22 @@ func downloadImages(imageData []ImageData ) Result {
 		createImageDownloadDirectory()
 
 		// Create file
-		file, err := os.Create(Constants["imageDownloadPath"].(string) + imageName)
+		file, err := os.Create(resources.Constants["imageDownloadPath"].(string) + imageName)
 		if err != nil {
-			result.success = false
-			result.errorMessage = "Error creating file: " + err.Error() + " for image: " + imageName + " at link: " + imageLink
+			result.Success = false
+			result.ErrorMessage = "Error creating file: " + err.Error() + " for image: " + imageName + " at link: " + imageLink
 		}
 		defer file.Close()
 
 		// Copy image data to file
 		_, err = io.Copy(file, response.Body)
 		if err != nil {
-			result.success = false
-			result.errorMessage = "Error copying data to file: " + err.Error() + " for image: " + imageName + " at link: " + imageLink
+			result.Success = false
+			result.ErrorMessage = "Error copying data to file: " + err.Error() + " for image: " + imageName + " at link: " + imageLink
+		}
+		result.Count++
+		if result.Count == resources.Constants["imageCount"].(int) {
+			break
 		}
 	}
 	return result
